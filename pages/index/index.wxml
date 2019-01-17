@@ -1,11 +1,35 @@
-<!--index.wxml-->
-<view class="container">
-  <view class="userinfo">
-    <button wx:if="{{!hasUserInfo && canIUse}}"  open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 点击获取我的昵称 </button>
-    <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
-    </block>
+<view>
+  <view class=''></view>
+  <view class="historycon topArea">
+    <scroll-view scroll-y="true" scroll-top="{{scrollTop}}" class="history" scroll-top="{{scrollTop}}">
+      <block wx:for="{{messageArray}}" wx:for-index="idx" wx:for-item="itemName">
+        <view class="selfMessage" wx:if="{{itemName.type == 'self'}}">
+          <view style="text-align: right;padding: 5rpx 20rpx;">
+            <view>
+              <text class="name">{{ itemName.name }}</text>
+            </view>
+            <view class='new_txt you'>{{itemName.message}}</view>
+          </view>
+        </view>
+        <view class="otherMessage" wx:else>
+          <view style="text-align: left;padding: 5rpx 20rpx;">
+            <view>
+              <text class="name">{{ itemName.name }}</text>
+            </view>
+            <view class='new_txt'>{{itemName.message}}</view>
+          </view>
+        </view>
+      </block>
+      <view class='hei' id="hei"></view>
+    </scroll-view>
   </view>
-  <view bindtap="toChat"><button class="chat"> ♥ 聊天室 点击进入</button></view>
+</view>
+
+<!-- 聊天输入 -->
+<view class="message">
+  <form bindreset="send" class="sendMessage">
+    <input type="text" placeholder="{{placeholderText}}" bindinput='bindKeyInput' cursor-spacing="10rpx"></input>
+    <!-- <view class="add" bindtap='increase'>+</view>  -->
+    <button type="primary" formType="reset" size="small" button-hover="blue">发送</button>
+  </form>
 </view>
