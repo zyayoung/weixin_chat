@@ -1,59 +1,88 @@
-//index.js
-//获取应用实例
-const app = getApp()
-
 Page({
   data: {
-    userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
+    placeholderText: "连接服务器中...",
+    scrollTop: 0,
+    messageArray: [],
+    socketOpen: false,
+    inputValue: "",
   },
-  //事件处理函数
-  // bindViewTap: function() {
-  //   wx.navigateTo({
-  //     url: '../chat/chat'
-  //   })
-  // },
-  toChat: function () {
-    wx.navigateTo({
-      url: '../chat/chat'
-    })
+  onLoad: function(options) {
+    var self = this;
+    console.log("将要连接服务器。");
+    wx.connectSocket({
+      url: 'ws://118.25.94.244:15449',
+      header: {
+        'content-type': 'application/json'
+      },
+      protocols: ['protocol1'],
+      method: 'GET'
+    });
+
+    wx.onSocketOpen(function(res) {
+      console.log("连接服务器成功。");
+      self.setData({
+        placeholderText: "连接服务器成功，请输入姓名。",
+        socketOpen: true
+      });
+    });
+
+    wx.onSocketMessage(function(res) {
+      console.log('收到服务器内容：' + res.data);
+      setTimeout(function() {
+        self.bottom()
+      }, 100);
+      var data = res.data;
+      var dataArray = data.split("_");
+      var newMessage = {
+        type: dataArray[0],
+        name: dataArray[1],
+        time: dataArray[2],
+        message: dataArray[3]
+      };
+      var newArray = self.data.messageArray.concat(newMessage);
+      self.setData({
+        messageArray: newArray,
+        placeholderText: "请输入信息"
+      });
+    });
   },
-  onLoad: function () {
-    console.log(app.globalData.userInfo)
-    if (app.globalData.userInfo) {
+
+  onUnload: function() {
+    wx.closeSocket();
+  },
+
+  bindKeyInput: function(e) {
+    this.setData({
+      inputValue: e.detail.value
+    });
+  },
+
+  send: function() {
+    if (this.data.inputValue != "") {
+      this.sendSocketMessage(this.data.inputValue);
       this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
-      })
-    } else if (this.data.canIUse){
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        })
-      }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
-      })
+        inputValue: ""
+      });
     }
   },
-  getUserInfo: function(e) {
-    console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
+
+  bottom: function() {
+    var query = wx.createSelectorQuery()
+    query.select('#hei').boundingClientRect()
+    query.selectViewport().scrollOffset()
+    query.exec(function(res) {
+      wx.pageScrollTo({
+        scrollTop: res[0].bottom // #the-id节点的下边界坐标
+      })
+      res[1].scrollTop // 显示区域的竖直滚动位置
     })
+  },
+
+  sendSocketMessage: function(msg) {
+    if (this.data.socketOpen) {
+      wx.sendSocketMessage({
+        data: msg
+      })
+    }
   }
-})
+});

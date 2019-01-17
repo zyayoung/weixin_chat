@@ -1,13 +1,11 @@
 {
-  "pages":[
-    "pages/index/index",
-    "pages/chat/chat"
+  "pages": [
+    "pages/index/index"
   ],
-  "window":{
-    "backgroundTextStyle":"black",
-    "navigationBarBackgroundColor": "#eee",
-    "navigationBarTitleText": "首页",
-    "navigationBarTextStyle":"black",
-    "navigationStyle":"default"
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#000000",
+    "navigationBarTitleText": "WebSocket demo",
+    "navigationBarTextStyle": "#ffffff"
   }
 }
